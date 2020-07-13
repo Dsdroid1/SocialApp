@@ -1,6 +1,7 @@
 #include<iostream>
 #include<string>
 #include<list>
+#include<map>
 #include<iterator>
 
 using namespace std;
@@ -49,6 +50,14 @@ class Person{
                 iter++;
             }
             return sc;
+        }
+
+        Person(std::string Name,int Age,int UserID,std::string Password)
+        {
+            this->Name=Name;
+            this->Password=Password;
+            this->Age=Age;
+            this->UserID=UserID;
         }
 };
 
@@ -207,7 +216,22 @@ class GraphDataNode{
                 //The second node does not exist.
             }
         }
-
+        void DisplayAllConnections()//Incomplete...
+        {
+            cout << "Friend(s):" << endl;
+            GraphEdgeNode *FriendList=this->GetFriendList();
+            GraphDataNode *Friend=NULL;
+            while(FriendList != NULL)
+            {
+                cout << endl;
+                Friend=FriendList->GetDataNode();
+                cout << "Name of Friend:" <<(Friend->GetUserInfo).GetName() << endl;
+                cout << "UserID of friend:" << (Friend->GetUserInfo).GetUserID() << endl;
+                FriendList=FriendList->Advance();
+            }
+            cout << "Possible Connectons:" << endl;
+            //Do a DFS....
+        }
 };
 
 class Graph{
@@ -233,7 +257,6 @@ class Graph{
                 {
                     sc=FAILURE;
                 }
-                
             }
             else
             {
@@ -410,6 +433,54 @@ class Graph{
             }
             return sc;
         }
+        
+        //The Above functions are support some Basic Operations on the graph.
+        //Next,Algorithms will be implemented.
+        void Full_DFS()
+        {
+            GraphDataNode *Users=UserList;
+            
+            if(Users!=NULL)
+            {
+                
+                //Also,initialize a HashMap to keep track of which IDs have been visisted
+                map<int, int> visited;
+                //Use a more reliable DS
+                while(Users!=NULL)
+                {
+                    visited.insert(pair<int, int>((Users->GetUserInfo()).GetUserID(),0));
+                    Users=Users->GetNextUser();
+                }
+                //0 signifies no node has been visited yet.
+                Users=UserList;
+                //Now start the algorithm for DFS
+                while(Users != NULL)
+                {
+                    if(visited[(Users->GetUserInfo()).GetUserID()]==0)
+                    {
+                        DFS(Users,visited);
+                    }
+                    Users=Users->GetNextUser();
+                }
+            }
+        }
 
-
+        void DFS(GraphDataNode *curr,map<int,int> visited)
+        {
+            if(visited[(curr->GetUserInfo()).GetUserID]==0)
+            {
+                GraphEdgeNode *FriendList;
+                visited[(curr->GetUserInfo()).GetUserID()]=1;
+                cout << "Visited " << (curr->GetUserInfo()).GetUserID() << endl;
+                FriendList=curr->GetFriendList();
+                while(FriendList != NULL)
+                {
+                    if(visited[FriendList->GetFriendID()]==0)
+                    {
+                        DFS(FriendList->GetDataNode(),visited);
+                    }
+                    FriendList=FriendList->Advance();
+                }
+            }
+        }
 };
