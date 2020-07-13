@@ -7,6 +7,32 @@
 using namespace std;
 
 typedef enum {FAILURE,SUCCESS} status_code;
+typedef enum {LEFT_UNBALANCE,BALANCED,RIGHT_UNBALANCED} Balance_factor;
+//Note: LEFT_UNBALANCED woul mean Tree is skewed Left that ht(left_subtree)>ht(right_subtree).
+
+class AVLTreeNode{
+    public:
+        int ID=-1;
+        int visited=0;
+        AVLTreeNode *left=NULL;
+        AVLTreeNode *right=NULL;
+        Balance_factor BF=BALANCED;
+
+        //Functions
+        AVLTreeNode* LeftRotate();
+        AVLTreeNode* RightRotate();
+};
+
+class AVLTree{
+    public:
+        AVLTreeNode *root;
+        status_code Insert(int ID);
+        status_code Delete(int ID);
+};
+
+
+
+
 
 class Person{
     private:
@@ -216,7 +242,7 @@ class GraphDataNode{
                 //The second node does not exist.
             }
         }
-        void DisplayAllConnections()//Incomplete...
+        void DisplayAllConnections(Graph G)//Incomplete...
         {
             cout << "Friend(s):" << endl;
             GraphEdgeNode *FriendList=this->GetFriendList();
@@ -231,6 +257,23 @@ class GraphDataNode{
             }
             cout << "Possible Connectons:" << endl;
             //Do a DFS....
+            //Make a map
+            map<int, int> visited;
+                //Use a more reliable DS
+                //Maybe use an AVL Tree(Self Implemented)
+                //It will make search time O(logN) but reliable(No collision stuff)
+            GraphDataNode *Users;
+            Users=G.GetUserList();
+            while(Users!=NULL)
+            {
+                visited.insert(pair<int, int>((Users->GetUserInfo()).GetUserID(),0));
+                Users=Users->GetNextUser();
+            }
+            //But don't print the friends again... 
+            //Require a modded DFS...
+            //It can have an extra param such as isStartPoint to see if it should print or not...
+            G.DFS(this,visited);
+            
         }
 };
 
@@ -239,6 +282,7 @@ class Graph{
         GraphDataNode *UserList=NULL;
 
     public:
+        GraphDataNode* GetUserList(){ return UserList;}
         status_code AddUserAtEnd(Person P)
         {
             status_code sc=SUCCESS;
@@ -446,6 +490,8 @@ class Graph{
                 //Also,initialize a HashMap to keep track of which IDs have been visisted
                 map<int, int> visited;
                 //Use a more reliable DS
+                //Maybe use an AVL Tree(Self Implemented)
+                //It will make search time O(logN) but reliable(No collision stuff)
                 while(Users!=NULL)
                 {
                     visited.insert(pair<int, int>((Users->GetUserInfo()).GetUserID(),0));
