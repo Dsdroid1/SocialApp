@@ -322,5 +322,94 @@ class Graph{
             return sc;
         }
 
-        
+        status_code DeleteID(int ID)
+        {
+            //First check if ID exists in the Graph
+            GraphDataNode *Users=UserList,*prev=NULL;
+            status_code sc=SUCCESS;
+            int found=0;
+            while(Users!=NULL && found==0)
+            {
+                if((Users->GetUserInfo).GetUserID==ID)
+                {
+                    found=1;
+                }
+                else
+                {
+                    prev=Users;
+                    Users=Users->GetNextUser();   
+                }
+            }
+            if(found==1)
+            {
+                //TO be DELETED
+                //We wil try to delete the edges first
+                GraphEdgeNode *Edgelist=Users->GetFriendList(),*toDelete=NULL;
+                GraphEdgeNode *Friend_s_list=NULL,*friend_prev=NULL;
+                GraphDataNode *Data=NULL;
+                int friend_found=0;
+                while(Edgelist != NULL && sc==SUCCESS)
+                {
+                    friend_found=0;
+                    Data=Edgelist->GetDataNode();
+                    Friend_s_list=Data->GetFriendList();
+                    friend_prev=NULL;
+                    while(Friend_s_list != NULL && friend_found==0)
+                    {
+                        if(Friend_s_list->GetFriendID == ID)
+                        {
+                            friend_found=1;
+                        }
+                        else
+                        {
+                            friend_prev=Friend_s_list;
+                            Friend_s_list=Friend_s_list->Advance();
+                        }
+                    }
+                    if(friend_found==1)
+                    {
+                        if(friend_prev==NULL)
+                        {
+                            //This was the first(latest node)
+                            Data->SetFriendListPtr((Data->GetFriendList())->Advance());
+                            free(Friend_s_list);
+                        }
+                        else
+                        {
+                            friend_prev->SetNextGraphEdgeNode(Friend_s_list->Advance());   
+                            free(Friend_s_list);
+                        }
+                        //Now even delete from the ID node
+                        toDelete=Edgelist;
+                        Edgelist=Edgelist->Advance();
+                        free(toDelete);
+                    }
+                    else
+                    {
+                        sc=FAILURE;
+                    }
+                    
+                }
+                if(sc==SUCCESS)
+                {
+                    //Now delete the ID node
+                    if(prev==NULL)
+                    {
+                        UserList=Users->GetNextUser();
+                    }
+                    else
+                    {
+                        prev->SetNextUser(Users->GetNextUser());
+                    }
+                    free(Users);
+                }
+            }
+            else
+            {
+                sc=FAILURE;//ID to be deleted does not exist
+            }
+            return sc;
+        }
+
+
 };
